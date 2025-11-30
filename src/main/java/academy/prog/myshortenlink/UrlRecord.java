@@ -29,6 +29,7 @@ public class UrlRecord {
 
     public UrlStatDTO toDTO() {
         var dto = new UrlStatDTO();
+        dto.setId(id);
         dto.setCount(count);
         dto.setLastAccess(lastAccess);
         dto.setUrl(url);

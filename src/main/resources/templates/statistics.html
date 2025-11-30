@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Link Statistics</h2>
+        <a href="/" class="btn btn-outline-primary">Back to Home</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Original URL</th>
+                    <th>Short Link</th>
+                    <th>Visits</th>
+                    <th>Last Access</th>
+                    <th style="width: 100px;">Action</th>
+                </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = window.location.origin;
+
+    async function loadStats() {
+        const response = await fetch('/stat');
+        const data = await response.json();
+
+        const tbody = document.getElementById('statsTableBody');
+        tbody.innerHTML = '';
+
+        data.forEach(item => {
+            const shortUrlLink = `${API_BASE_URL}/my/${item.id}`;
+            const lastAccessDate = item.lastAccess ? new Date(item.lastAccess).toLocaleString() : 'Never';
+
+            const row = `
+                <tr>
+                    <td><a href="${item.url}" target="_blank" class="text-truncate d-inline-block" style="max-width: 300px;">${item.url}</a></td>
+                    <td><a href="${shortUrlLink}" target="_blank">${shortUrlLink}</a></td>
+                    <td><span class="badge bg-info text-dark">${item.count}</span></td>
+                    <td>${lastAccessDate}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteLink(${item.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    async function deleteLink(id) {
+        if (!confirm('Are you sure you want to delete this link?')) return;
+
+        try {
+            const response = await fetch(`/my/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                loadStats();
+            } else {
+                alert('Failed to delete link');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Something went wrong');
+        }
+    }
+
+    loadStats();
+</script>
+
+</body>
+</html>
