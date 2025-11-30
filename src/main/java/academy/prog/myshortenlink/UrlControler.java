@@ -29,11 +29,17 @@ public class UrlControler {
 
     @PostMapping("shorten")
     public ShortenUrlDTO shorten(@RequestBody UrlDTO request) {
-        var id = urlService.shortenUrl(request.getUrl());
+        String url = request.getUrl();
+
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+
+        var id = urlService.shortenUrl(url);
         var shortenUrl = domainName + ":" + port + "/my/" + id;
 
         ShortenUrlDTO result = new ShortenUrlDTO();
-        result.setUrl(request.getUrl());
+        result.setUrl(url);
         result.setShortUrl(shortenUrl);
 
         return result;
@@ -50,7 +56,7 @@ public class UrlControler {
         headers.setLocation(URI.create(longUrl));
         headers.setCacheControl("must-revalidate, no-cache, no-store");
 
-        return new ResponseEntity(headers, HttpStatus.FOUND);
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     @DeleteMapping("my/{id}")
